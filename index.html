@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:20px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.dropdown{
+padding:8px;
+font-size:16px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+border-radius:10px;
+padding:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.name{
+font-weight:bold;
+font-size:18px;
+}
+
+.price{
+color:green;
+margin-top:5px;
+}
+
+.stock{
+color:#00a86b;
+margin-top:5px;
+}
+
+.btn{
+margin-top:10px;
+padding:6px 10px;
+border-radius:5px;
+border:none;
+cursor:pointer;
+}
+
+.add{
+background:#4c6ef5;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<h2>Miru Cravings</h2>
+
+<select id="categoryFilter" class="dropdown" onchange="filterCategory()">
+<option value="All">All Categories</option>
+</select>
+
+</div>
+
+<div id="menu" class="grid">Loading...</div>
+
+<script>
+
+let allItems = [];
+let allCategories = [];
+
+ZOHO.CREATOR.init().then(function(){
+
+loadCategories(); // 🔥 load categories first
+loadMenu();       // 🔥 load items
+
+});
+
+// 🔥 LOAD CATEGORIES (CORRECT)
+function loadCategories(){
+
+ZOHO.CREATOR.API.getAllRecords({
+appName:"miru-cravings",
+reportName:"Menu_Categories_Report"
+}).then(function(res){
+
+allCategories = res.data;
+
+let dropdown = document.getElementById("categoryFilter");
+dropdown.innerHTML = '<option value="All">All Categories</option>';
+
+allCategories.forEach(cat => {
+
+dropdown.innerHTML += `
+<option value="${cat.ID}">
+${cat.Category_Name}
+</option>
+`;
+
+});
+
+});
+
+}
+// 🔥 LOAD MENU ITEMS
+function loadMenu(){
+
+ZOHO.CREATOR.API.getAllRecords({
+appName:"miru-cravings",
+reportName:"manage_quantity"
+}).then(function(res){
+
+console.log("MENU:", res);
+
+if(!res.data || res.data.length === 0){
+document.getElementById("menu").innerHTML = "No items found";
+return;
+}
+
+allItems = res.data;
+
+renderMenu(allItems);
+
+}).catch(function(err){
+
+console.log("ERROR:", err);
+document.getElementById("menu").innerHTML = "Error loading data";
+
+});
+
+}
+
+// 🔥 RENDER MENU
+function renderMenu(items){
+
+let html = "";
+
+items.forEach(function(item){
+
+if(!item) return;
+
+html += `
+<div class="card">
+
+<div class="name">${item.Item_Name || "No Name"}</div>
+
+<div class="price">₹ ${item.Price || 0}</div>
+
+<div class="stock">Available: ${item.Available_Quantity || 0}</div>
+
+<button class="btn add"
+onclick="addToCart(${item.ID}, ${item.Price})">
+Add
+</button>
+
+</div>
+`;
+
+});
+
+document.getElementById("menu").innerHTML = html;
+
+}
+// 🔥 FILTER USING CATEGORY ID (IMPORTANT)
+function filterCategory(){
+
+let selected = document.getElementById("categoryFilter").value;
+
+if(selected === "All"){
+renderMenu(allItems);
+return;
+}
+
+let filtered = allItems.filter(item => {
+
+if(item.Categories && item.Categories.ID){
+return String(item.Categories.ID) === String(selected);
+}
+
+return false;
+
+});
+
+renderMenu(filtered);
+
+}
+
+// 🔥 ADD TO CART
+function addToCart(id, price){
+
+ZOHO.CREATOR.API.addRecord({
+appName:"miru-cravings",
+formName:"Cart",
+data:{
+Session_ID:"test_session",
+Menu_Items:id,
+Quantity:1,
+Price:price,
+Subtotal:price
+}
+}).then(function(){
+
+alert("Added to Cart");
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
