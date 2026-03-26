@@ -89,16 +89,20 @@ let allCategories = [];
 
 ZOHO.CREATOR.init().then(function(){
 
-loadCategories(); // 🔥 load categories first
-loadMenu();       // 🔥 load items
+ZOHO.CREATOR.util.getInitParams().then(function(params){
+console.log("INIT PARAMS:", params);
+});
+
+loadCategories();
+loadMenu();
 
 });
 
 // 🔥 LOAD CATEGORIES (CORRECT)
 function loadCategories(){
 
-ZOHO.CREATOR.API.invokeConnector({
-name:"getCategories"
+ZOHO.CREATOR.DATA.getRecords({
+reportName: "Menu_Categories_Report"
 }).then(function(res){
 
 console.log("CATEGORIES:", res);
@@ -126,8 +130,8 @@ console.log("ERROR:", err);
 // 🔥 LOAD MENU ITEMS
 function loadMenu(){
 
-ZOHO.CREATOR.API.invokeConnector({
-name:"getMenu"
+ZOHO.CREATOR.DATA.getRecords({
+reportName: "manage_quantity"
 }).then(function(res){
 
 console.log("MENU:", res);
