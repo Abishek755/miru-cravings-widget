@@ -97,10 +97,11 @@ loadMenu();       // 🔥 load items
 // 🔥 LOAD CATEGORIES (CORRECT)
 function loadCategories(){
 
-ZOHO.CREATOR.API.getAllRecords({
-appName:"miru-cravings",
-reportName:"Menu_Categories_Report"
+ZOHO.CREATOR.API.invokeConnector({
+name:"getCategories"
 }).then(function(res){
+
+console.log("CATEGORIES:", res);
 
 allCategories = res.data;
 
@@ -117,15 +118,16 @@ ${cat.Category_Name}
 
 });
 
+}).catch(function(err){
+console.log("ERROR:", err);
 });
 
 }
 // 🔥 LOAD MENU ITEMS
 function loadMenu(){
 
-ZOHO.CREATOR.API.getAllRecords({
-appName:"miru-cravings",
-reportName:"manage_quantity"
+ZOHO.CREATOR.API.invokeConnector({
+name:"getMenu"
 }).then(function(res){
 
 console.log("MENU:", res);
@@ -136,7 +138,6 @@ return;
 }
 
 allItems = res.data;
-
 renderMenu(allItems);
 
 }).catch(function(err){
@@ -147,7 +148,6 @@ document.getElementById("menu").innerHTML = "Error loading data";
 });
 
 }
-
 // 🔥 RENDER MENU
 function renderMenu(items){
 
