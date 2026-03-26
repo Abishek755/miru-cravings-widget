@@ -89,10 +89,6 @@ let allCategories = [];
 
 ZOHO.CREATOR.init().then(function(){
 
-ZOHO.CREATOR.util.getInitParams().then(function(params){
-console.log("INIT PARAMS:", params);
-});
-
 loadCategories();
 loadMenu();
 
@@ -105,7 +101,11 @@ ZOHO.CREATOR.DATA.getRecords({
 reportName: "Menu_Categories_Report"
 }).then(function(res){
 
-console.log("CATEGORIES:", res);
+console.log("CATEGORY RESPONSE:", res);
+
+if(!res || !res.data){
+return;
+}
 
 allCategories = res.data;
 
@@ -114,9 +114,11 @@ dropdown.innerHTML = '<option value="All">All Categories</option>';
 
 allCategories.forEach(cat => {
 
+if(!cat) return;
+
 dropdown.innerHTML += `
 <option value="${cat.ID}">
-${cat.Category_Name}
+${cat.Category_Name || "No Name"}
 </option>
 `;
 
@@ -134,9 +136,14 @@ ZOHO.CREATOR.DATA.getRecords({
 reportName: "manage_quantity"
 }).then(function(res){
 
-console.log("MENU:", res);
+console.log("MENU RESPONSE:", res);
 
-if(!res.data || res.data.length === 0){
+if(!res || !res.data){
+document.getElementById("menu").innerHTML = "No data received";
+return;
+}
+
+if(res.data.length === 0){
 document.getElementById("menu").innerHTML = "No items found";
 return;
 }
